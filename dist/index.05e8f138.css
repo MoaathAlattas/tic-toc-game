@@ -3,16 +3,16 @@ body {
   margin: 50px auto;
 }
 
-tictoc-board > * {
+tic-toc > * {
   margin-bottom: 8px;
 }
 
-tictoc-board .cells {
+tic-toc .cells {
   grid-template-columns: repeat(3, auto);
   display: grid;
 }
 
-tictoc-board .cells > * {
+tic-toc .cells > * {
   width: 100px;
   height: 100px;
   cursor: pointer;
@@ -25,12 +25,12 @@ tictoc-board .cells > * {
   box-shadow: 0 0 0 1px #333;
 }
 
-tictoc-board .cells > :hover {
+tic-toc .cells > :hover {
   background-color: #ededed;
 }
 
-tictoc-board .cells > [data-win-cell="true"] {
+tic-toc .cells > [data-win-cell="true"] {
   color: green;
 }
 
-/*# sourceMappingURL=index.2cdaf7bc.css.map */
+/*# sourceMappingURL=index.05e8f138.css.map */

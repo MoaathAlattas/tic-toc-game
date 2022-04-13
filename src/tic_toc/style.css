@@ -3,16 +3,16 @@ body {
   width: 306px;
 }
 
-tictoc-board > div {
+tic-toc>* {
   margin-bottom: 8px;
 }
 
-tictoc-board div.cells {
+tic-toc *.cells {
   display: grid;
   grid-template-columns: repeat(3, auto);
 }
 
-tictoc-board div.cells > button {
+tic-toc *.cells>* {
   background-color: #fff;
   width: 100px;
   height: 100px;
@@ -25,10 +25,10 @@ tictoc-board div.cells > button {
   z-index: 999;
 }
 
-tictoc-board div.cells > button:hover {
+tic-toc *.cells>*:hover {
   background-color: #ededed;
 }
 
-tictoc-board div.cells > button[data-win-cell="true"] {
+tic-toc *.cells>*[data-win-cell="true"] {
   color: green;
 }

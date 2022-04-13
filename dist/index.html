@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head><link rel="stylesheet" href="/index.2cdaf7bc.css">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-  </head>
-  <body>
-    sssssfddsfds fdsf
-    <tictoc-board>
-      <div>
-        Current Player: <span data-target="tictoc-board.curPlayer"></span>
-      </div>
-      <div class="cells" data-target="tictoc-board.cellsWrapper" data-action="click:tictoc-board#onCellClick"></div>
-      <div data-target="tictoc-board.msg"></div>
-      <div>
-        <button data-target="tictoc-board.undoBtn" data-action="click:tictoc-board#onUndoClick">
-          Undo
-        </button>
-        <button data-target="tictoc-board.resetBtn" data-action="click:tictoc-board#onResetClick">
-          Reset
-        </button>
-      </div>
-    </tictoc-board>
-    <script src="/index.6b815632.js" defer=""></script>
-  </body>
+
+<head><link rel="stylesheet" href="/index.05e8f138.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <tic-toc>
+    <div>
+      Current Player: <span data-target="tic-toc.curPlayer"></span>
+    </div>
+    <div class="cells" data-target="tic-toc.cellsWrapper"></div>
+    <div data-target="tic-toc.msg"></div>
+    <div>
+      <button data-target="tic-toc.undoBtn">
+        Undo
+      </button>
+      <button data-target="tic-toc.resetBtn">
+        Reset
+      </button>
+    </div>
+  </tic-toc>
+  <script src="/index.975ef6c8.js" defer=""></script>
+</body>
+
 </html>
