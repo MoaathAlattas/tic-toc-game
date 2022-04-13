@@ -533,42 +533,65 @@ const ELEMENT_NAME = "tic-toc";
 const POS_DATA_ATTR = "pos";
 const WIN_DATA_ATTR = "winCell";
 // html partials
-const resultMsg = (target, state)=>{
-    if (state.winner) return _uhtml.html`Congrats Player ${state.winner}`;
-    if (state.playCount === 9) return _uhtml.html`No winner! Reset to play again :)`;
-    return _uhtml.render(target, _uhtml.html``);
+const renderResultMsg = (target, { winner , playCount  })=>{
+    if (winner) return _uhtml.html`Congrats Player ${winner}`;
+    if (playCount === 9) return _uhtml.html`No winner! Reset to play again :)`;
+    return target && _uhtml.render(target, _uhtml.html``);
 };
-const cells = (state)=>[
-        ...new Array(9)
-    ].map((_, i)=>{
-        const playObj = state.getPlayByPosition(i);
+const renderCells = (target, model)=>{
+    const cell = (_, i)=>{
+        const playObj = model.getPlayByPosition(i);
         const value = playObj ? playObj.value : "";
         const winDataAttr = playObj && playObj.win ? true : null;
         return _uhtml.html`
-    <div .dataset=${{
+      <div .dataset=${{
             [POS_DATA_ATTR]: i,
             [WIN_DATA_ATTR]: winDataAttr,
             targets: `${ELEMENT_NAME}.cells`
         }}>
-      ${value}
-    </div>
-  `;
-    })
-;
+        ${value}
+      </div>
+    `;
+    };
+    return target && _uhtml.render(target, _uhtml.html`${[
+        ...new Array(9)
+    ].map(cell)}`);
+};
+const renderCurrPlayer = (target, { player  })=>{
+    return target && _uhtml.render(target, _uhtml.html`${player}`);
+};
 class TicTocElement extends HTMLElement {
     #model = new _modelDefault.default();
+    // setup
     connectedCallback() {
-        this.eventListeners();
+        this.setupListeners();
         this.render();
     }
-    eventListeners() {
+    setupListeners() {
         this.cellsWrapper?.addEventListener('click', this.onCellClick.bind(this));
         this.undoBtn?.addEventListener('click', this.onUndoClick.bind(this));
         this.resetBtn?.addEventListener('click', this.onResetClick.bind(this));
     }
-    get state() {
-        return this.#model;
+    // event handlers
+    onCellClick({ target  }) {
+        this.#model.playOnce(target.dataset.pos);
+        this.render();
     }
+    onUndoClick() {
+        this.#model.undo();
+        this.render();
+    }
+    onResetClick() {
+        this.#model.reset();
+        this.render();
+    }
+    // dom changes
+    render() {
+        renderCells(this.cellsWrapper, this.#model);
+        renderResultMsg(this.msg, this.#model);
+        renderCurrPlayer(this.curPlayer, this.#model);
+    }
+    // targets
     get curPlayer() {
         return this.querySelector(`[data-target="${ELEMENT_NAME}.curPlayer"]`);
     }
@@ -586,23 +609,6 @@ class TicTocElement extends HTMLElement {
     }
     get cells() {
         return this.querySelectorAll(`[data-target="${ELEMENT_NAME}.cells"]`);
-    }
-    onCellClick({ target  }) {
-        this.state.playOnce(target.dataset.pos);
-        this.render();
-    }
-    onUndoClick() {
-        this.state.undo();
-        this.render();
-    }
-    onResetClick() {
-        this.state.reset();
-        this.render();
-    }
-    render() {
-        this.cellsWrapper && _uhtml.render(this.cellsWrapper, _uhtml.html`${cells(this.state)}`);
-        this.msg && _uhtml.render(this.msg, resultMsg(this.state));
-        this.curPlayer && _uhtml.render(this.curPlayer, _uhtml.html`${this.state.player}`);
     }
 }
 if (!customElements.get(ELEMENT_NAME)) customElements.define(ELEMENT_NAME, TicTocElement);
