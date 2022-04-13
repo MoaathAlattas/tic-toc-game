@@ -525,95 +525,323 @@ parcelHelpers.export(exports, "ELEMENT_NAME", ()=>ELEMENT_NAME
 // custom element
 parcelHelpers.export(exports, "TicTocElement", ()=>TicTocElement
 );
-var _uhtml = require("uhtml");
 var _styleCss = require("./style.css");
+var _customElement = require("../lib/customElement");
 var _model = require("./model");
 var _modelDefault = parcelHelpers.interopDefault(_model);
+var _view = require("./view");
+var _viewDefault = parcelHelpers.interopDefault(_view);
 const ELEMENT_NAME = "tic-toc";
-const POS_DATA_ATTR = "pos";
-const WIN_DATA_ATTR = "winCell";
-// html partials
-const renderResultMsg = (target, { winner , playCount  })=>{
-    if (winner) return _uhtml.html`Congrats Player ${winner}`;
-    if (playCount === 9) return _uhtml.html`No winner! Reset to play again :)`;
-    return target && _uhtml.render(target, _uhtml.html``);
-};
-const renderCells = (target, model)=>{
-    const cell = (_, i)=>{
-        const playObj = model.getPlayByPosition(i);
-        const value = playObj ? playObj.value : "";
-        const winDataAttr = playObj && playObj.win ? true : null;
-        return _uhtml.html`
-      <div .dataset=${{
-            [POS_DATA_ATTR]: i,
-            [WIN_DATA_ATTR]: winDataAttr,
-            targets: `${ELEMENT_NAME}.cells`
-        }}>
-        ${value}
-      </div>
-    `;
-    };
-    return target && _uhtml.render(target, _uhtml.html`${[
-        ...new Array(9)
-    ].map(cell)}`);
-};
-const renderCurrPlayer = (target, { player  })=>{
-    return target && _uhtml.render(target, _uhtml.html`${player}`);
-};
 class TicTocElement extends HTMLElement {
-    #model = new _modelDefault.default();
+    name = ELEMENT_NAME;
+    _target = [
+        "curPlayer",
+        "msg",
+        "undoBtn",
+        "resetBtn",
+        "cellsWrapper"
+    ];
+    _targets = [
+        "cells"
+    ];
     // setup
     connectedCallback() {
-        this.setupListeners();
-        this.render();
-    }
-    setupListeners() {
         this.cellsWrapper?.addEventListener('click', this.onCellClick.bind(this));
         this.undoBtn?.addEventListener('click', this.onUndoClick.bind(this));
         this.resetBtn?.addEventListener('click', this.onResetClick.bind(this));
     }
     // event handlers
     onCellClick({ target  }) {
-        this.#model.playOnce(target.dataset.pos);
-        this.render();
+        this._model.playOnce(target.dataset.pos);
     }
     onUndoClick() {
-        this.#model.undo();
-        this.render();
+        this._model.undo();
     }
     onResetClick() {
-        this.#model.reset();
-        this.render();
+        this._model.reset();
     }
-    // dom changes
-    render() {
-        renderCells(this.cellsWrapper, this.#model);
-        renderResultMsg(this.msg, this.#model);
-        renderCurrPlayer(this.curPlayer, this.#model);
-    }
-    // targets
-    get curPlayer() {
-        return this.querySelector(`[data-target="${ELEMENT_NAME}.curPlayer"]`);
-    }
-    get msg() {
-        return this.querySelector(`[data-target="${ELEMENT_NAME}.msg"]`);
-    }
-    get undoBtn() {
-        return this.querySelector(`[data-target="${ELEMENT_NAME}.undoBtn"]`);
-    }
-    get resetBtn() {
-        return this.querySelector(`[data-target="${ELEMENT_NAME}.resetBtn"]`);
-    }
-    get cellsWrapper() {
-        return this.querySelector(`[data-target="${ELEMENT_NAME}.cellsWrapper"]`);
-    }
-    get cells() {
-        return this.querySelectorAll(`[data-target="${ELEMENT_NAME}.cells"]`);
+    viewPrams() {
+        return {
+            element: this,
+            model: this._model
+        };
     }
 }
-if (!customElements.get(ELEMENT_NAME)) customElements.define(ELEMENT_NAME, TicTocElement);
+if (!customElements.get(ELEMENT_NAME)) {
+    window[ELEMENT_NAME] = TicTocElement;
+    customElements.define(ELEMENT_NAME, _customElement.customElement(TicTocElement, {
+        model: [
+            _modelDefault.default
+        ],
+        view: _viewDefault.default
+    }));
+}
 
-},{"uhtml":"if09d","./style.css":"2XdU1","./model":"jEd6E","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"if09d":[function(require,module,exports) {
+},{"./style.css":"2XdU1","../lib/customElement":"1clMl","./model":"jEd6E","./view":"lMSsC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2XdU1":[function() {},{}],"1clMl":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "customElement", ()=>customElement
+);
+parcelHelpers.export(exports, "findTarget", ()=>findTarget
+);
+parcelHelpers.export(exports, "findTargets", ()=>findTargets
+);
+function customElement(customElement1, { model , view  }) {
+    let _view;
+    const render = customElement1.prototype.render;
+    customElement1.prototype.render = function() {
+        render && render();
+        _view && _view.render();
+    };
+    const connectedCallback = customElement1.prototype.connectedCallback;
+    customElement1.prototype.connectedCallback = function() {
+        // model
+        let __model;
+        model.length;
+        const _model = model ? new Proxy(new model[0](), {
+            set: (target, name, val)=>{
+                target[name] = val;
+                this.render();
+                return true;
+            }
+        }) : null;
+        Object.defineProperty(this, "_model", {
+            get: ()=>_model
+        });
+        // setup the view
+        if (view && !_view) _view = new view(this.viewPrams());
+        // Target
+        this._target && this._target.map((targetName)=>{
+            Object.defineProperty(this, targetName, {
+                get: ()=>{
+                    return findTarget(this, targetName);
+                }
+            });
+        });
+        // Targets
+        this._target && this._targets.map((targetsName)=>{
+            Object.defineProperty(this, targetsName, {
+                get: ()=>{
+                    return findTargets(this, targetsName);
+                }
+            });
+        });
+        _view.render();
+        connectedCallback && connectedCallback.call(this);
+    };
+    return customElement1;
+}
+function findTarget(element, name) {
+    return element.querySelector(`[data-target="${element.name}.${name}"]`);
+}
+function findTargets(element, name) {
+    return element.querySelectorAll(`[data-target="${element.name}.${name}"]`);
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
+    };
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, '__esModule', {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
+            }
+        });
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
+
+},{}],"jEd6E":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+const WINNING_CONDITIONS = [
+    [
+        0,
+        1,
+        2
+    ],
+    [
+        3,
+        4,
+        5
+    ],
+    [
+        6,
+        7,
+        8
+    ],
+    [
+        0,
+        3,
+        6
+    ],
+    [
+        1,
+        4,
+        7
+    ],
+    [
+        2,
+        5,
+        8
+    ],
+    [
+        0,
+        4,
+        8
+    ],
+    [
+        2,
+        4,
+        6
+    ]
+];
+const PLAYER = {
+    ONE: "X",
+    TWO: "O"
+};
+const DEFAULT_PLAYER = PLAYER.ONE;
+class TicTocModel {
+    player = DEFAULT_PLAYER;
+    winner = "";
+    plays = [];
+    playOnce(position) {
+        if (!this.canPlay(position)) return;
+        this.plays.push({
+            value: this.player,
+            position: parseInt(position, 10),
+            win: false
+        });
+        if (this.checkWinner.length > 0) this.setWinner();
+        if (!this.isDone) this.switchPlayer();
+    }
+    undo() {
+        if (this.playCount === 0) return;
+        if (this.winner !== "") this.plays.forEach((play)=>{
+            play.win = false;
+        });
+        const lastPlay = this.plays[this.playCount - 1];
+        this.plays.pop();
+        this.player = lastPlay.value;
+        this.winner = "";
+    }
+    reset() {
+        Object.assign(this, new this.constructor());
+    }
+    setWinner() {
+        this.plays.forEach((play)=>{
+            if (this.checkWinner.includes(play.position)) play.win = true;
+        });
+        this.winner = this.player;
+    }
+    switchPlayer() {
+        this.player = this.nextPlayer;
+    }
+    canPlay(position) {
+        const alreadyPlayed = this.plays.find((play)=>play.position === parseInt(position, 10)
+        );
+        return !alreadyPlayed && this.winner === "";
+    }
+    getPlayByPosition(position) {
+        return this.plays.find((play)=>play.position === parseInt(position, 10)
+        );
+    }
+    get playCount() {
+        return this.plays.length;
+    }
+    get valuesByPosition() {
+        return this.plays.reduce((acc, play, i)=>{
+            acc[play.position] = play.value;
+            return acc;
+        }, {});
+    }
+    get nextPlayer() {
+        return this.player === PLAYER.ONE ? PLAYER.TWO : PLAYER.ONE;
+    }
+    get isDone() {
+        return this.playCount === 9 || this.winner !== "";
+    }
+    get checkWinner() {
+        const winCondition = WINNING_CONDITIONS.find((condition)=>{
+            const a = this.valuesByPosition[condition[0]];
+            const b = this.valuesByPosition[condition[1]];
+            const c = this.valuesByPosition[condition[2]];
+            if (!a || !b || !c) return false;
+            return a === b && b === c;
+        });
+        return winCondition || [];
+    }
+}
+exports.default = TicTocModel;
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lMSsC":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _uhtml = require("uhtml");
+const POS_DATA_ATTR = "pos";
+const WIN_DATA_ATTR = "winCell";
+function render(target, content) {
+    target && _uhtml.render(target, content);
+}
+class TicTocView {
+    constructor({ element , model  }){
+        this._element = element;
+        this._model = model;
+    }
+    resultMsg() {
+        let msg = "";
+        if (this._model.winner) msg = `Congrats Player ${this._model.winner}`;
+        else if (this._model.playCount === 9) msg = `No winner! Reset to play again :)`;
+        return render(this._element.msg, _uhtml.html`${msg}`);
+    }
+    cells() {
+        const cell = (_, i)=>{
+            const playObj = this._model.getPlayByPosition(i);
+            const value = playObj ? playObj.value : "";
+            const winDataAttr = playObj && playObj.win ? true : null;
+            return _uhtml.html`
+            <div .dataset=${{
+                [POS_DATA_ATTR]: i,
+                [WIN_DATA_ATTR]: winDataAttr,
+                targets: `${this._element.name}.cells`
+            }}>
+                ${value}
+            </div>
+            `;
+        };
+        return render(this._element.cellsWrapper, _uhtml.html`${[
+            ...new Array(9)
+        ].map(cell)}`);
+    }
+    currPlayer() {
+        return render(this._element.curPlayer, _uhtml.html`${this._model.player}`);
+    }
+    render() {
+        this.cells();
+        this.resultMsg();
+        this.currPlayer();
+    }
+}
+exports.default = TicTocView;
+
+},{"uhtml":"if09d","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"if09d":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Hole", ()=>_rabbitJs.Hole
@@ -710,37 +938,7 @@ exports.default = (_)=>({
     })
 ;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
-exports.interopDefault = function(a) {
-    return a && a.__esModule ? a : {
-        default: a
-    };
-};
-exports.defineInteropFlag = function(a) {
-    Object.defineProperty(a, '__esModule', {
-        value: true
-    });
-};
-exports.exportAll = function(source, dest) {
-    Object.keys(source).forEach(function(key) {
-        if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) return;
-        Object.defineProperty(dest, key, {
-            enumerable: true,
-            get: function() {
-                return source[key];
-            }
-        });
-    });
-    return dest;
-};
-exports.export = function(dest, destName, get) {
-    Object.defineProperty(dest, destName, {
-        enumerable: true,
-        get: get
-    });
-};
-
-},{}],"4YYgA":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"4YYgA":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "createCache", ()=>createCache
@@ -1449,129 +1647,6 @@ parcelHelpers.defineInteropFlag(exports);
     }
 }(document);
 exports.default = createContent;
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2XdU1":[function() {},{}],"jEd6E":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-const WINNING_CONDITIONS = [
-    [
-        0,
-        1,
-        2
-    ],
-    [
-        3,
-        4,
-        5
-    ],
-    [
-        6,
-        7,
-        8
-    ],
-    [
-        0,
-        3,
-        6
-    ],
-    [
-        1,
-        4,
-        7
-    ],
-    [
-        2,
-        5,
-        8
-    ],
-    [
-        0,
-        4,
-        8
-    ],
-    [
-        2,
-        4,
-        6
-    ]
-];
-const PLAYER = {
-    ONE: "X",
-    TWO: "O"
-};
-const DEFAULT_PLAYER = PLAYER.ONE;
-class TicTocModel {
-    player = DEFAULT_PLAYER;
-    winner = "";
-    plays = [];
-    playOnce(position) {
-        if (!this.canPlay(position)) return;
-        this.plays.push({
-            value: this.player,
-            position: parseInt(position, 10),
-            win: false
-        });
-        if (this.checkWinner.length > 0) this.setWinner();
-        if (!this.isDone) this.switchPlayer();
-    }
-    undo() {
-        if (this.playCount === 0) return;
-        if (this.winner !== "") this.plays.forEach((play)=>{
-            play.win = false;
-        });
-        const lastPlay = this.plays[this.playCount - 1];
-        this.plays.pop();
-        this.player = lastPlay.value;
-        this.winner = "";
-    }
-    reset() {
-        Object.assign(this, new this.constructor());
-    }
-    setWinner() {
-        this.plays.forEach((play)=>{
-            if (this.checkWinner.includes(play.position)) play.win = true;
-        });
-        this.winner = this.player;
-    }
-    switchPlayer() {
-        this.player = this.nextPlayer;
-    }
-    canPlay(position) {
-        const alreadyPlayed = this.plays.find((play)=>play.position === parseInt(position, 10)
-        );
-        return !alreadyPlayed && this.winner === "";
-    }
-    getPlayByPosition(position) {
-        return this.plays.find((play)=>play.position === parseInt(position, 10)
-        );
-    }
-    get playCount() {
-        return this.plays.length;
-    }
-    get valuesByPosition() {
-        return this.plays.reduce((acc, play, i)=>{
-            acc[play.position] = play.value;
-            return acc;
-        }, {});
-    }
-    get nextPlayer() {
-        return this.player === PLAYER.ONE ? PLAYER.TWO : PLAYER.ONE;
-    }
-    get isDone() {
-        return this.playCount === 9 || this.winner !== "";
-    }
-    get checkWinner() {
-        const winCondition = WINNING_CONDITIONS.find((condition)=>{
-            const a = this.valuesByPosition[condition[0]];
-            const b = this.valuesByPosition[condition[1]];
-            const c = this.valuesByPosition[condition[2]];
-            if (!a || !b || !c) return false;
-            return a === b && b === c;
-        });
-        return winCondition || [];
-    }
-}
-exports.default = TicTocModel;
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["7nZVA","8lqZg"], "8lqZg", "parcelRequiref550")
 
