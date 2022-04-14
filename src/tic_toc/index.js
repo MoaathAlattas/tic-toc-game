@@ -31,16 +31,13 @@ export class TicTocElement extends HTMLElement {
   onCellClick({ target }) {
     if (target.dataset.pos) {
       this.model.ticTocModel.playOnce(target.dataset.pos)
-      this.render()
     }
   }
   onUndoClick() {
     this.model.ticTocModel.undo();
-    this.render()
   }
   onResetClick() {
     this.model.ticTocModel.reset();
-    this.render()
   }
 
 }

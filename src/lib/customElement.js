@@ -1,3 +1,10 @@
+function debounceRender(instance) {
+    if (instance.debounce) {
+        cancelAnimationFrame(instance.debounce);
+    }
+    instance.debounce = requestAnimationFrame(() => instance.render());
+};
+
 export function customElement(customElement) {
     let _view = null;
     let _model = {};
@@ -8,7 +15,7 @@ export function customElement(customElement) {
     const render = customElement.prototype.render
     customElement.prototype.render = function () {
         render && render()
-        _view && _view.render()
+        _view && debounceRender(_view)
         console.log("yo");
     }
 
@@ -17,15 +24,15 @@ export function customElement(customElement) {
 
         // setup models
         if (customElement.model.length > 0) {
-            // const _model = model ? new Proxy(new model[0](), {
-            //     set: (target, name, val) => {
-            //         target[name] = val
-            //         this.render();
-            //         return true
-            //     }
-            // }) : null;
             customElement.model.forEach(Model => {
-                _model[Model.name.charAt(0).toLowerCase() + Model.name.slice(1)] = new Model()
+                const modelName = Model.name.charAt(0).toLowerCase() + Model.name.slice(1)
+                _model[modelName] = new Proxy(new Model(), {
+                    set: (target, name, val) => {
+                        target[name] = val
+                        debounceRender(this);
+                        return true
+                    }
+                })
             })
             Object.defineProperty(this, "model", {
                 enumerable: true,
@@ -56,7 +63,7 @@ export function customElement(customElement) {
                 get: () => findTargets(this, targetsName)
             })
         })
-        _view.render();
+        debounceRender(_view);
         connectedCallback && connectedCallback.call(this)
     }
 

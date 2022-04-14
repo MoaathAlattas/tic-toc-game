@@ -562,18 +562,13 @@ class TicTocElement extends HTMLElement {
     }
     // event handlers
     onCellClick({ target  }) {
-        if (target.dataset.pos) {
-            this.model.ticTocModel.playOnce(target.dataset.pos);
-            this.render();
-        }
+        if (target.dataset.pos) this.model.ticTocModel.playOnce(target.dataset.pos);
     }
     onUndoClick() {
         this.model.ticTocModel.undo();
-        this.render();
     }
     onResetClick() {
         this.model.ticTocModel.reset();
-        this.render();
     }
 }
 if (!customElements.get(ELEMENT_NAME)) {
@@ -590,6 +585,11 @@ parcelHelpers.export(exports, "findTarget", ()=>findTarget
 );
 parcelHelpers.export(exports, "findTargets", ()=>findTargets
 );
+function debounceRender(instance) {
+    if (instance.debounce) cancelAnimationFrame(instance.debounce);
+    instance.debounce = requestAnimationFrame(()=>instance.render()
+    );
+}
 function customElement(customElement1) {
     let _view = null;
     let _model = {};
@@ -598,22 +598,22 @@ function customElement(customElement1) {
     const render = customElement1.prototype.render;
     customElement1.prototype.render = function() {
         render && render();
-        _view && _view.render();
+        _view && debounceRender(_view);
         console.log("yo");
     };
     const connectedCallback = customElement1.prototype.connectedCallback;
     customElement1.prototype.connectedCallback = function() {
         // setup models
         if (customElement1.model.length > 0) {
-            // const _model = model ? new Proxy(new model[0](), {
-            //     set: (target, name, val) => {
-            //         target[name] = val
-            //         this.render();
-            //         return true
-            //     }
-            // }) : null;
             customElement1.model.forEach((Model)=>{
-                _model[Model.name.charAt(0).toLowerCase() + Model.name.slice(1)] = new Model();
+                const modelName = Model.name.charAt(0).toLowerCase() + Model.name.slice(1);
+                _model[modelName] = new Proxy(new Model(), {
+                    set: (target, name, val)=>{
+                        target[name] = val;
+                        debounceRender(this);
+                        return true;
+                    }
+                });
             });
             Object.defineProperty(this, "model", {
                 enumerable: true,
@@ -641,7 +641,7 @@ function customElement(customElement1) {
                 get: ()=>findTargets(this, targetsName)
             });
         });
-        _view.render();
+        debounceRender(_view);
         connectedCallback && connectedCallback.call(this);
     };
     return customElement1;
