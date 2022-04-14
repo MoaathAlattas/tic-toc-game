@@ -1,13 +1,13 @@
-import "./style.css";
+import "./tic_toc.style.css";
 import { customElement } from '../lib/customElement'
-import TicTocModel from './model'
-import TicTocView from './view'
+import TicTocModel from './tic_toc.model'
+import TicTocView from './tic_toc.view'
 
 // constants
 export const ELEMENT_NAME = "tic-toc";
 
 // custom element
-export class TicTocElement extends HTMLElement {
+export default class TicTocElement extends HTMLElement {
   name = ELEMENT_NAME
   static model = [TicTocModel];
   static view = TicTocView

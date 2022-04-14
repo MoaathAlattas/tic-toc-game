@@ -1,6 +1,6 @@
 
-import { ELEMENT_NAME } from './index.js'
-import './index.js'
+import { ELEMENT_NAME } from '../tic_toc.element.js'
+import '../tic_toc.element.js'
 
 test("custom elements in JSDOM", () => {
   document.body.innerHTML = `
