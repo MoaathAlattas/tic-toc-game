@@ -1,10 +1,7 @@
-import { render as renderer, html } from "uhtml";
+import { render, html } from '../lib/render'
+
 const POS_DATA_ATTR = "pos";
 const WIN_DATA_ATTR = "winCell";
-
-function render(target, content) {
-    target && renderer(target, content)
-}
 
 export default class TicTocView {
 
@@ -20,7 +17,7 @@ export default class TicTocView {
         } else if (this._model.playCount === 9) {
             msg = `No winner! Reset to play again :)`
         }
-        return render(this._element.msg, html`${msg}`);
+        return html`${msg}`;
     }
 
     cells() {
@@ -34,16 +31,16 @@ export default class TicTocView {
             </div>
             `
         }
-        return render(this._element.cellsWrapper, html`${[...new Array(9)].map(cell)}`);
+        return html`${[...new Array(9)].map(cell)}`
     }
 
     currPlayer() {
-        return render(this._element.curPlayer, html`${this._model.player}`)
+        return html`${this._model.player}`
     }
 
     render() {
-        this.cells();
-        this.resultMsg();
-        this.currPlayer();
+        render(this._element.target.msg, this.resultMsg());
+        render(this._element.target.cellsWrapper, this.cells());
+        render(this._element.target.curPlayer, this.currPlayer());
     }
 }

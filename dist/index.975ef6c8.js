@@ -534,47 +534,51 @@ var _viewDefault = parcelHelpers.interopDefault(_view);
 const ELEMENT_NAME = "tic-toc";
 class TicTocElement extends HTMLElement {
     name = ELEMENT_NAME;
-    _target = [
+    static model = [
+        _modelDefault.default
+    ];
+    static view = _viewDefault.default;
+    static target = [
         "curPlayer",
         "msg",
         "undoBtn",
         "resetBtn",
         "cellsWrapper"
     ];
-    _targets = [
+    static targets = [
         "cells"
     ];
+    get viewData() {
+        return {
+            element: this,
+            model: this.model.ticTocModel
+        };
+    }
     // setup
     connectedCallback() {
-        this.cellsWrapper?.addEventListener('click', this.onCellClick.bind(this));
-        this.undoBtn?.addEventListener('click', this.onUndoClick.bind(this));
-        this.resetBtn?.addEventListener('click', this.onResetClick.bind(this));
+        this.target.cellsWrapper?.addEventListener('click', this.onCellClick.bind(this));
+        this.target.undoBtn?.addEventListener('click', this.onUndoClick.bind(this));
+        this.target.resetBtn?.addEventListener('click', this.onResetClick.bind(this));
     }
     // event handlers
     onCellClick({ target  }) {
-        this._model.playOnce(target.dataset.pos);
+        if (target.dataset.pos) {
+            this.model.ticTocModel.playOnce(target.dataset.pos);
+            this.render();
+        }
     }
     onUndoClick() {
-        this._model.undo();
+        this.model.ticTocModel.undo();
+        this.render();
     }
     onResetClick() {
-        this._model.reset();
-    }
-    viewPrams() {
-        return {
-            element: this,
-            model: this._model
-        };
+        this.model.ticTocModel.reset();
+        this.render();
     }
 }
 if (!customElements.get(ELEMENT_NAME)) {
     window[ELEMENT_NAME] = TicTocElement;
-    customElements.define(ELEMENT_NAME, _customElement.customElement(TicTocElement, {
-        model: [
-            _modelDefault.default
-        ],
-        view: _viewDefault.default
-    }));
+    customElements.define(ELEMENT_NAME, _customElement.customElement(TicTocElement));
 }
 
 },{"./style.css":"2XdU1","../lib/customElement":"1clMl","./model":"jEd6E","./view":"lMSsC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2XdU1":[function() {},{}],"1clMl":[function(require,module,exports) {
@@ -586,44 +590,48 @@ parcelHelpers.export(exports, "findTarget", ()=>findTarget
 );
 parcelHelpers.export(exports, "findTargets", ()=>findTargets
 );
-function customElement(customElement1, { model , view  }) {
-    let _view;
+function customElement(customElement1) {
+    let _view = null;
+    let _model = {};
+    customElement1.prototype.target = {};
+    customElement1.prototype.targets = {};
     const render = customElement1.prototype.render;
     customElement1.prototype.render = function() {
         render && render();
         _view && _view.render();
+        console.log("yo");
     };
     const connectedCallback = customElement1.prototype.connectedCallback;
     customElement1.prototype.connectedCallback = function() {
-        // model
-        let __model;
-        model.length;
-        const _model = model ? new Proxy(new model[0](), {
-            set: (target, name, val)=>{
-                target[name] = val;
-                this.render();
-                return true;
-            }
-        }) : null;
-        Object.defineProperty(this, "_model", {
-            get: ()=>_model
-        });
-        // setup the view
-        if (view && !_view) _view = new view(this.viewPrams());
+        // setup models
+        if (customElement1.model.length > 0) {
+            customElement1.model.forEach((Model)=>{
+                _model[Model.name.charAt(0).toLowerCase() + Model.name.slice(1)] = new Model();
+            });
+            Object.defineProperty(this, "model", {
+                enumerable: true,
+                get: ()=>_model
+            });
+        }
+        // setup view
+        if (customElement1.view && !_view) {
+            _view = new customElement1.view(this.viewData);
+            Object.defineProperty(this, "view", {
+                get: ()=>_view
+            });
+        }
         // Target
-        this._target && this._target.map((targetName)=>{
-            Object.defineProperty(this, targetName, {
-                get: ()=>{
-                    return findTarget(this, targetName);
-                }
+        customElement1.target && customElement1.target.map((targetName)=>{
+            Object.defineProperty(this.target, targetName, {
+                enumerable: true,
+                get: ()=>findTarget(this, targetName)
             });
         });
         // Targets
-        this._target && this._targets.map((targetsName)=>{
-            Object.defineProperty(this, targetsName, {
-                get: ()=>{
-                    return findTargets(this, targetsName);
-                }
+        customElement1.target && customElement1.targets.map((targetsName)=>{
+            Object.defineProperty(this.targets, targetsName, {
+                enumerable: true,
+                get: ()=>findTargets(this, targetsName)
             });
         });
         _view.render();
@@ -755,8 +763,7 @@ class TicTocModel {
         this.player = this.nextPlayer;
     }
     canPlay(position) {
-        const alreadyPlayed = this.plays.find((play)=>play.position === parseInt(position, 10)
-        );
+        const alreadyPlayed = this.getPlayByPosition(position);
         return !alreadyPlayed && this.winner === "";
     }
     getPlayByPosition(position) {
@@ -794,12 +801,9 @@ exports.default = TicTocModel;
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"lMSsC":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-var _uhtml = require("uhtml");
+var _render = require("../lib/render");
 const POS_DATA_ATTR = "pos";
 const WIN_DATA_ATTR = "winCell";
-function render(target, content) {
-    target && _uhtml.render(target, content);
-}
 class TicTocView {
     constructor({ element , model  }){
         this._element = element;
@@ -809,14 +813,14 @@ class TicTocView {
         let msg = "";
         if (this._model.winner) msg = `Congrats Player ${this._model.winner}`;
         else if (this._model.playCount === 9) msg = `No winner! Reset to play again :)`;
-        return render(this._element.msg, _uhtml.html`${msg}`);
+        return _render.html`${msg}`;
     }
     cells() {
         const cell = (_, i)=>{
             const playObj = this._model.getPlayByPosition(i);
             const value = playObj ? playObj.value : "";
             const winDataAttr = playObj && playObj.win ? true : null;
-            return _uhtml.html`
+            return _render.html`
             <div .dataset=${{
                 [POS_DATA_ATTR]: i,
                 [WIN_DATA_ATTR]: winDataAttr,
@@ -826,20 +830,32 @@ class TicTocView {
             </div>
             `;
         };
-        return render(this._element.cellsWrapper, _uhtml.html`${[
+        return _render.html`${[
             ...new Array(9)
-        ].map(cell)}`);
+        ].map(cell)}`;
     }
     currPlayer() {
-        return render(this._element.curPlayer, _uhtml.html`${this._model.player}`);
+        return _render.html`${this._model.player}`;
     }
     render() {
-        this.cells();
-        this.resultMsg();
-        this.currPlayer();
+        _render.render(this._element.target.msg, this.resultMsg());
+        _render.render(this._element.target.cellsWrapper, this.cells());
+        _render.render(this._element.target.curPlayer, this.currPlayer());
     }
 }
 exports.default = TicTocView;
+
+},{"../lib/render":"Xx4QE","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"Xx4QE":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "render", ()=>render
+);
+parcelHelpers.export(exports, "html", ()=>_uhtml.html
+);
+var _uhtml = require("uhtml");
+function render(target, content) {
+    target && _uhtml.render(target, content);
+}
 
 },{"uhtml":"if09d","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"if09d":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");

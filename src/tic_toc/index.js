@@ -9,32 +9,38 @@ export const ELEMENT_NAME = "tic-toc";
 // custom element
 export class TicTocElement extends HTMLElement {
   name = ELEMENT_NAME
-  _target = ["curPlayer", "msg", "undoBtn", "resetBtn", "cellsWrapper"]
-  _targets = ["cells"]
+  static model = [TicTocModel];
+  static view = TicTocView
+  static target = ["curPlayer", "msg", "undoBtn", "resetBtn", "cellsWrapper"]
+  static targets = ["cells"]
+  get viewData() {
+    return {
+      element: this,
+      model: this.model.ticTocModel
+    }
+  }
 
   // setup
   connectedCallback() {
-    this.cellsWrapper?.addEventListener('click', this.onCellClick.bind(this))
-    this.undoBtn?.addEventListener('click', this.onUndoClick.bind(this))
-    this.resetBtn?.addEventListener('click', this.onResetClick.bind(this))
+    this.target.cellsWrapper?.addEventListener('click', this.onCellClick.bind(this))
+    this.target.undoBtn?.addEventListener('click', this.onUndoClick.bind(this))
+    this.target.resetBtn?.addEventListener('click', this.onResetClick.bind(this))
   }
 
   // event handlers
   onCellClick({ target }) {
-    this._model.playOnce(target.dataset.pos);
+    if (target.dataset.pos) {
+      this.model.ticTocModel.playOnce(target.dataset.pos)
+      this.render()
+    }
   }
   onUndoClick() {
-    this._model.undo();
+    this.model.ticTocModel.undo();
+    this.render()
   }
   onResetClick() {
-    this._model.reset();
-  }
-
-  viewPrams() {
-    return {
-      element: this,
-      model: this._model
-    }
+    this.model.ticTocModel.reset();
+    this.render()
   }
 
 }
@@ -43,9 +49,6 @@ if (!customElements.get(ELEMENT_NAME)) {
   window[ELEMENT_NAME] = TicTocElement
   customElements.define(
     ELEMENT_NAME,
-    customElement(TicTocElement, {
-      model: [TicTocModel],
-      view: TicTocView
-    })
+    customElement(TicTocElement)
   )
 }

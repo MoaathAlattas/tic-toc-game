@@ -62,11 +62,8 @@ export default class TicTocModel {
     switchPlayer() {
         this.player = this.nextPlayer;
     }
-
     canPlay(position) {
-        const alreadyPlayed = this.plays.find(
-            (play) => play.position === parseInt(position, 10)
-        );
+        const alreadyPlayed = this.getPlayByPosition(position);
         return !alreadyPlayed && this.winner === "";
     }
     getPlayByPosition(position) {
