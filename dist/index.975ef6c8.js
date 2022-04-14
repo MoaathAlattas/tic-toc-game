@@ -605,6 +605,13 @@ function customElement(customElement1) {
     customElement1.prototype.connectedCallback = function() {
         // setup models
         if (customElement1.model.length > 0) {
+            // const _model = model ? new Proxy(new model[0](), {
+            //     set: (target, name, val) => {
+            //         target[name] = val
+            //         this.render();
+            //         return true
+            //     }
+            // }) : null;
             customElement1.model.forEach((Model)=>{
                 _model[Model.name.charAt(0).toLowerCase() + Model.name.slice(1)] = new Model();
             });
