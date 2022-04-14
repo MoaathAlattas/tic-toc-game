@@ -1,32 +1,27 @@
 import { render, html } from '../lib/render'
+import { BaseView } from '../lib/customElement'
 
 const POS_DATA_ATTR = "pos";
 const WIN_DATA_ATTR = "winCell";
 
-export default class TicTocView {
+export default class TicTocView extends BaseView {
 
-    constructor({ element, model }) {
-        this._element = element
-        this._model = model
-    }
-
-    resultMsg() {
-        let msg = ""
-        if (this._model.winner) {
-            msg = `Congrats Player ${this._model.winner}`
-        } else if (this._model.playCount === 9) {
-            msg = `No winner! Reset to play again :)`
+    resultMsg({ winner, playCount }) {
+        if (winner) {
+            return html`Congrats Player ${winner}`
+        } else if (playCount === 9) {
+            return html`No winner! Reset to play again :)`
         }
-        return html`${msg}`;
+        return html``;
     }
 
-    cells() {
+    cells({ getPlayByPosition, name }) {
         const cell = (_, i) => {
-            const playObj = this._model.getPlayByPosition(i);
+            const playObj = getPlayByPosition(i);
             const value = playObj ? playObj.value : "";
             const winDataAttr = playObj && playObj.win ? true : null;
             return html`
-            <div .dataset=${{ [POS_DATA_ATTR]: i, [WIN_DATA_ATTR]: winDataAttr, targets: `${this._element.name}.cells` }}>
+            <div .dataset=${{ [POS_DATA_ATTR]: i, [WIN_DATA_ATTR]: winDataAttr, targets: `${name}.cells` }}>
                 ${value}
             </div>
             `
@@ -34,13 +29,23 @@ export default class TicTocView {
         return html`${[...new Array(9)].map(cell)}`
     }
 
-    currPlayer() {
-        return html`${this._model.player}`
+    currPlayer({ player }) {
+        return html`${player}`
     }
 
     render() {
-        render(this._element.target.msg, this.resultMsg());
-        render(this._element.target.cellsWrapper, this.cells());
-        render(this._element.target.curPlayer, this.currPlayer());
+        render(this.element.target.msg, this.resultMsg({
+            winner: this.model.ticTocModel.winner,
+            playCount: this.model.ticTocModel.playCount
+        }));
+
+        render(this.element.target.cellsWrapper, this.cells({
+            getPlayByPosition: this.model.ticTocModel.getPlayByPosition.bind(this.model.ticTocModel),
+            name: this.element.name
+        }));
+
+        render(this.element.target.curPlayer, this.currPlayer({
+            player: this.model.ticTocModel.player
+        }));
     }
 }

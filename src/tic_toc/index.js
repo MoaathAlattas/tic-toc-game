@@ -13,12 +13,6 @@ export class TicTocElement extends HTMLElement {
   static view = TicTocView
   static target = ["curPlayer", "msg", "undoBtn", "resetBtn", "cellsWrapper"]
   static targets = ["cells"]
-  get viewData() {
-    return {
-      element: this,
-      model: this.model.ticTocModel
-    }
-  }
 
   // setup
   connectedCallback() {

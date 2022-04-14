@@ -2,7 +2,7 @@ function debounceRender(instance) {
     if (instance.debounce) {
         cancelAnimationFrame(instance.debounce);
     }
-    instance.debounce = requestAnimationFrame(() => instance.render());
+    instance.debounce = requestAnimationFrame(() => { instance.render() });
 };
 
 export function customElement(customElement) {
@@ -11,12 +11,12 @@ export function customElement(customElement) {
 
     customElement.prototype.target = {}
     customElement.prototype.targets = {}
+    customElement.prototype.model = _model
 
     const render = customElement.prototype.render
     customElement.prototype.render = function () {
         render && render()
         _view && debounceRender(_view)
-        console.log("yo");
     }
 
     const connectedCallback = customElement.prototype.connectedCallback
@@ -42,10 +42,10 @@ export function customElement(customElement) {
 
         // setup view
         if (customElement.view && !_view) {
-            _view = new customElement.view(this.viewData)
-            Object.defineProperty(this, "view", {
-                get: () => _view
-            })
+            _view = new customElement.view({ model: _model, element: this, ...this.viewData })
+            // Object.defineProperty(this, "view", {
+            //     get: () => _view
+            // })
         }
 
         // Target
@@ -63,7 +63,7 @@ export function customElement(customElement) {
                 get: () => findTargets(this, targetsName)
             })
         })
-        debounceRender(_view);
+        _view.render();
         connectedCallback && connectedCallback.call(this)
     }
 
@@ -76,4 +76,10 @@ export function findTarget(element, name) {
 
 export function findTargets(element, name) {
     return element.querySelectorAll(`[data-target="${element.name}.${name}"]`)
+}
+
+export class BaseView {
+    constructor(viewData) {
+        Object.assign(this, viewData)
+    }
 }
