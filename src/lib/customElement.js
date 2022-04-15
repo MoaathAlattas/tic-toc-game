@@ -1,3 +1,6 @@
+import { bind } from './catalyst'
+
+
 function debounceRender(instance) {
     if (instance.debounce) {
         cancelAnimationFrame(instance.debounce);
@@ -57,12 +60,13 @@ export function customElement(customElement) {
         })
 
         // Targets
-        customElement.target && customElement.targets.map(targetsName => {
+        customElement.targets && customElement.targets.map(targetsName => {
             Object.defineProperty(this.targets, targetsName, {
                 enumerable: true,
                 get: () => findTargets(this, targetsName)
             })
         })
+        bind(this)
         _view.render();
         connectedCallback && connectedCallback.call(this)
     }

@@ -11,15 +11,25 @@
 <body>
   <tic-toc>
     <div>
-      Current Player: <span data-target="tic-toc.curPlayer"></span>
+      Current Player: <span data-target="tic-toc.curPlayer">X</span>
     </div>
-    <div class="cells" data-target="tic-toc.cellsWrapper"></div>
+    <div class="cells" data-target="tic-toc.cellsWrapper" data-action="click:tic-toc#onPlay">
+      <div data-targets="tic-toc.cells" data-pos="0"></div>
+      <div data-targets="tic-toc.cells" data-pos="1"></div>
+      <div data-targets="tic-toc.cells" data-pos="2"></div>
+      <div data-targets="tic-toc.cells" data-pos="3"></div>
+      <div data-targets="tic-toc.cells" data-pos="4"></div>
+      <div data-targets="tic-toc.cells" data-pos="5"></div>
+      <div data-targets="tic-toc.cells" data-pos="6"></div>
+      <div data-targets="tic-toc.cells" data-pos="7"></div>
+      <div data-targets="tic-toc.cells" data-pos="8"></div>
+    </div>
     <div data-target="tic-toc.msg"></div>
     <div>
-      <button data-target="tic-toc.undoBtn">
+      <button data-target="tic-toc.undoBtn" data-action="click:tic-toc#onUndo">
         Undo
       </button>
-      <button data-target="tic-toc.resetBtn">
+      <button data-target="tic-toc.resetBtn" data-action="click:tic-toc#onReset">
         Reset
       </button>
     </div>

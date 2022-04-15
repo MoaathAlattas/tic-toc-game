@@ -1,29 +1,34 @@
 import { render, html } from '../lib/render'
 import { BaseView } from '../lib/customElement'
 
-const POS_DATA_ATTR = "pos";
-const WIN_DATA_ATTR = "winCell";
+export const POS_DATA_ATTR = "pos";
+export const WIN_DATA_ATTR = "winCell";
+export const WIN_MSG = (winner) => `Congrats Player ${winner}`
+export const TIE_MSG = () => `No winner! Reset to play again :)`
 
-export default class TicTocView extends BaseView {
+export class TicTocView extends BaseView {
 
     resultMsg({ winner, playCount }) {
         if (winner) {
-            return html`Congrats Player ${winner}`
+            return html`${WIN_MSG(winner)}`
         } else if (playCount === 9) {
-            return html`No winner! Reset to play again :)`
+            return html`${TIE_MSG()}`
         }
         return html``;
     }
 
-    cells({ getPlayByPosition, name }) {
+    cells({ getPlayByPosition }) {
         const cell = (_, i) => {
             const playObj = getPlayByPosition(i);
             const value = playObj ? playObj.value : "";
             const winDataAttr = playObj && playObj.win ? true : null;
             return html`
-            <div .dataset=${{ [POS_DATA_ATTR]: i, [WIN_DATA_ATTR]: winDataAttr, targets: `${name}.cells` }}>
-                ${value}
-            </div>
+                <div .dataset=${{
+                    [POS_DATA_ATTR]: i,
+                    [WIN_DATA_ATTR]: winDataAttr
+                }}>
+                    ${value}
+                </div>
             `
         }
         return html`${[...new Array(9)].map(cell)}`
@@ -40,8 +45,7 @@ export default class TicTocView extends BaseView {
         }));
 
         render(this.element.target.cellsWrapper, this.cells({
-            getPlayByPosition: this.model.ticTocModel.getPlayByPosition.bind(this.model.ticTocModel),
-            name: this.element.name
+            getPlayByPosition: this.model.ticTocModel.getPlayByPosition.bind(this.model.ticTocModel)
         }));
 
         render(this.element.target.curPlayer, this.currPlayer({
