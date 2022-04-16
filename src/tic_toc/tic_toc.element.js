@@ -28,10 +28,9 @@ export default class TicTocElement extends HTMLElement {
 
 }
 
-if (!customElements.get(ELEMENT_NAME)) {
-  window[ELEMENT_NAME] = TicTocElement
-  customElements.define(
-    ELEMENT_NAME,
-    customElement(TicTocElement)
-  )
-}
+
+window[ELEMENT_NAME] = TicTocElement
+customElements.define(
+  ELEMENT_NAME,
+  customElement(TicTocElement)
+)

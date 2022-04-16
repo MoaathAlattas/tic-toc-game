@@ -53,6 +53,7 @@ export function customElement(customElement) {
 
         // Target
         customElement.target && customElement.target.map(targetName => {
+            if (targetName in this.target) return;
             Object.defineProperty(this.target, targetName, {
                 enumerable: true,
                 get: () => findTarget(this, targetName)
@@ -61,6 +62,7 @@ export function customElement(customElement) {
 
         // Targets
         customElement.targets && customElement.targets.map(targetsName => {
+            if (targetsName in this.targets) return;
             Object.defineProperty(this.targets, targetsName, {
                 enumerable: true,
                 get: () => findTargets(this, targetsName)

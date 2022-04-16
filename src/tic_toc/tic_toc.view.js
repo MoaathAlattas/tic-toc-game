@@ -2,7 +2,7 @@ import { render, html } from '../lib/render'
 import { BaseView } from '../lib/customElement'
 
 export const POS_DATA_ATTR = "pos";
-export const WIN_DATA_ATTR = "winCell";
+export const WIN_DATA_ATTR = "win";
 export const WIN_MSG = (winner) => `Congrats Player ${winner}`
 export const TIE_MSG = () => `No winner! Reset to play again :)`
 

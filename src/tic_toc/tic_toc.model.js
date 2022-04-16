@@ -61,11 +61,11 @@ export class TicTocModel {
     playOnce(position) {
         if (!this.canPlay(position)) return;
 
-        this.plays.push({
+        this.plays = [...this.plays, {
             value: this.player,
             position: parseInt(position, 10),
             win: false
-        });
+        }];
 
         if (this.checkWinner().length > 0) this.setWinner();
 
