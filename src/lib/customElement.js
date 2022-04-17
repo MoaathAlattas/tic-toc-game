@@ -9,7 +9,7 @@ function debounceRender(element) {
     element.debounce = requestAnimationFrame(() => element.render());
 };
 
-export function customElement(customElement, elementProps = {}) {
+export function customElement(customElement, props = {}) {
     customElement.prototype.target = {}
     customElement.prototype.targets = {}
     customElement.prototype.model = {}

@@ -1,6 +1,7 @@
 
 import { jest } from '@jest/globals';
-import { TicTocModel, DEFAULT_PLAYER, PLAYER } from '../tic_toc.model.js'
+import { DEFAULT_PLAYER, PLAYER } from '../constants.js'
+import { TicTocModel } from '../tic_toc.model.js'
 
 let ticTocModel;
 let plays = [];

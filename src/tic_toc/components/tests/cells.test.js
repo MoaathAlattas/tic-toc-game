@@ -1,5 +1,5 @@
 import { render } from '../../../lib/render.js'
-import { WIN_DATA_ATTR, POS_DATA_ATTR } from '../../tic_toc.view.js'
+import { WIN_DATA_ATTR, POS_DATA_ATTR } from '../../constants.js'
 import { Cells } from '../cells.js'
 
 

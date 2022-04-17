@@ -1,4 +1,8 @@
 import "./tic_toc.style.css";
+import {
+  ELEMENT_NAME, POS_DATA_ATTR,
+  WIN_DATA_ATTR, WIN_MSG, TIE_MSG
+} from './constants'
 import { customElement } from '../lib/customElement'
 import { html } from '../lib/render'
 import { TicTocModel } from './tic_toc.model'
@@ -9,30 +13,30 @@ import { ResultMsg } from './components/result_msg'
 import { UndoBtn } from './components/undo_btn'
 import { ResetBtn } from './components/reset_btn'
 
-// constants
-export const ELEMENT_NAME = "tic-toc";
-export const POS_DATA_ATTR = "pos";
-export const WIN_DATA_ATTR = "win";
-export const WIN_MSG = (winner) => `Congrats Player ${winner}`
-export const TIE_MSG = () => `No winner! Reset to play again :)`
-
 // custom element
 export default class TicTocElement extends HTMLElement {
   name = ELEMENT_NAME
   static model = [TicTocModel];
   static target = ["curPlayer", "msg", "undoBtn", "resetBtn", "cellsWrapper"]
-  // event handlers
-  onPlay = ({ target }) => {
+
+  constructor() {
+    super();
+    this.onUndo = this.onUndo.bind(this);
+    this.onReset = this.onReset.bind(this);
+    this.onPlay = this.onPlay.bind(this);
+  }
+
+  onPlay({ target }) {
     if (target.dataset.pos) {
       this.model.ticTocModel.playOnce(target.dataset.pos)
     }
   }
 
-  onUndo = () => {
+  onUndo() {
     this.model.ticTocModel.undo();
   }
 
-  onReset = () => {
+  onReset() {
     this.model.ticTocModel.reset();
   }
 
@@ -56,7 +60,6 @@ export default class TicTocElement extends HTMLElement {
       </div>
       `;
   }
-
 }
 
 if (!customElements.get(ELEMENT_NAME)) {

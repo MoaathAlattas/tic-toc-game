@@ -1,7 +1,8 @@
-import { ELEMENT_NAME } from '../tic_toc.element.js'
-import { DEFAULT_PLAYER, PLAYER } from '../tic_toc.model.js'
-import { POS_DATA_ATTR, WIN_DATA_ATTR } from '../tic_toc.view.js'
 import '../tic_toc.element.js'
+import {
+  DEFAULT_PLAYER, PLAYER, ELEMENT_NAME,
+  POS_DATA_ATTR, WIN_DATA_ATTR
+} from '../constants.js'
 
 describe.only('TicTocElement', () => {
   let $0;

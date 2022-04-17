@@ -1,5 +1,5 @@
 import { render } from '../../../lib/render.js'
-import { WIN_MSG, TIE_MSG } from '../../tic_toc.view.js'
+import { WIN_MSG, TIE_MSG } from '../../constants.js'
 
 import { ResultMsg } from '../result_msg.js'
 
