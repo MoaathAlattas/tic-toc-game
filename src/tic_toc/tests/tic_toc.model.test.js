@@ -11,14 +11,6 @@ const winScenario_player1 = (model) => {
   model.playOnce(7)
   model.playOnce(2)
 }
-const winScenario_player2 = (model) => {
-  model.playOnce(8)
-  model.playOnce(0)
-  model.playOnce(5)
-  model.playOnce(1)
-  model.playOnce(4)
-  model.playOnce(2)
-}
 const noWinnerScenario = (model) => {
   model.playOnce(8)
   model.playOnce(0)
@@ -120,9 +112,9 @@ describe('TicTocModel', () => {
   // nextPlayer
   test("Verify next player", () => {
     ticTocModel.player = PLAYER.ONE;
-    expect(ticTocModel.nextPlayer).toBe(PLAYER.TWO);
+    expect(ticTocModel.nextPlayer()).toBe(PLAYER.TWO);
     ticTocModel.player = PLAYER.TWO;
-    expect(ticTocModel.nextPlayer).toBe(PLAYER.ONE);
+    expect(ticTocModel.nextPlayer()).toBe(PLAYER.ONE);
   })
 
   // canPlay

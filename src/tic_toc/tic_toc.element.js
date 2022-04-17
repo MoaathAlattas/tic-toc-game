@@ -13,6 +13,10 @@ export default class TicTocElement extends HTMLElement {
   static view = TicTocView
   static target = ["curPlayer", "msg", "undoBtn", "resetBtn", "cellsWrapper"]
 
+  disconnectedCallback() {
+    this.model.ticTocModel.reset();
+  }
+
   // event handlers
   onPlay({ target }) {
     if (target.dataset.pos) {
@@ -28,9 +32,10 @@ export default class TicTocElement extends HTMLElement {
 
 }
 
-
-window[ELEMENT_NAME] = TicTocElement
-customElements.define(
-  ELEMENT_NAME,
-  customElement(TicTocElement)
-)
+if (!customElements.get(ELEMENT_NAME)) {
+  window[ELEMENT_NAME] = TicTocElement
+  customElements.define(
+    ELEMENT_NAME,
+    customElement(TicTocElement)
+  )
+}

@@ -28,7 +28,7 @@ describe('TicTocView', () => {
   test("Verify no message", () => {
     const resultMsg = ticTocView.resultMsg({ winner: "", "playCount": 8 })
     render(document.body, resultMsg)
-    expect(document.body.innerHTML).toBe("");
+    expect(document.body.textContent.trim()).toBe("");
   });
 
   // cells
@@ -54,10 +54,7 @@ describe('TicTocView', () => {
     render(document.body, cells)
     const divs = document.body.querySelectorAll(`div[data-${POS_DATA_ATTR}]`)
     divs.forEach(div => {
-      div.innerHTML
-        .replace('<!--isµ1-->', '')
-        .replace(/^(&nbsp;|\s)*/, '')
-      expect(div.innerHTML).toContain(value);
+      expect(div.textContent.trim()).toContain(value);
     })
   })
   test("Verify cells render win data attr", () => {

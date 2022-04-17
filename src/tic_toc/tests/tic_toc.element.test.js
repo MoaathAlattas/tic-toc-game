@@ -1,26 +1,21 @@
-import userEvent from '@testing-library/user-event/dist/index.mjs';
 import { ELEMENT_NAME } from '../tic_toc.element.js'
 import { DEFAULT_PLAYER, PLAYER } from '../tic_toc.model.js'
 import { POS_DATA_ATTR, WIN_DATA_ATTR } from '../tic_toc.view.js'
 import '../tic_toc.element.js'
 
-describe('TicTocElement', () => {
-  let ticTocElement;
+describe.only('TicTocElement', () => {
   let $0;
+  let CLICK_EVENT = new Event('click', { bubbles: true })
 
-  const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 100));
+  const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 50));
 
   const getCellByPos = (position) => $0.querySelector(`[data-${POS_DATA_ATTR}="${position}"]`);
   const playOn = async (positions) => {
     for (const position of positions) {
-      const cell = getCellByPos(position);
-      await userEvent.click(cell)
+      $0.onPlay({ target: getCellByPos(position) });
     }
     await flushPromises()
   }
-  const cleanUpContent = (str) => {
-    return str.replace('<!--isµ1-->', '').replace(/^(&nbsp;|\s)*/, '')
-  };
 
   // Render to dom: cells, winner message, current player
   // Events: play once, undo, reset
@@ -32,103 +27,117 @@ describe('TicTocElement', () => {
   //   - reset
   //   - play once on an empty cell
   //   - play once on a cell that is already played
-  beforeEach(() => {
-    ticTocElement = document.createElement(ELEMENT_NAME);
-    ticTocElement.innerHTML = `
-      <${ELEMENT_NAME}>
-        <span data-target="${ELEMENT_NAME}.curPlayer">X</span>
-        <div data-target="${ELEMENT_NAME}.cellsWrapper"
-             data-action="click:${ELEMENT_NAME}#onPlay"></div>
-        <div data-target="${ELEMENT_NAME}.msg"></div>
-        <div>
-          <button data-target="${ELEMENT_NAME}.undoBtn"
-                  data-action="click:${ELEMENT_NAME}#onUndo">Undo</button>
-          <button data-target="${ELEMENT_NAME}.resetBtn"
-                  data-action="click:${ELEMENT_NAME}#onReset">Reset</button>
-        </div>
-      </${ELEMENT_NAME}>
-    `;
+  beforeEach(async () => {
+    let ticTocElement = document.createElement(ELEMENT_NAME);
+    ticTocElement.id = "some-id";
     document.body.appendChild(ticTocElement);
-    $0 = document.body.querySelector(ELEMENT_NAME);
+    await flushPromises()
+    $0 = document.body.querySelector('#some-id');
+  });
+
+  afterEach(async () => {
+    document.body.textContent = '';
+    await flushPromises()
+    $0 = null;
   });
 
   // happy path
   test("Verify winner render", async () => {
     const plays = [0, 8, 1, 7, 2]
     await playOn(plays)
-    expect($0.target.msg.innerHTML).not.toBe("");
+    expect($0.target.msg.textContent).not.toBe(" ");
     expect(getCellByPos(0).getAttribute(`data-${WIN_DATA_ATTR}`)).toBe("true")
     expect(getCellByPos(1).getAttribute(`data-${WIN_DATA_ATTR}`)).toBe("true")
     expect(getCellByPos(2).getAttribute(`data-${WIN_DATA_ATTR}`)).toBe("true")
     plays.forEach((position) => {
-      expect(getCellByPos(position).innerHTML).not.toBe(null)
+      expect(getCellByPos(position).textContent).not.toBe(null)
     });
   });
   test("Verify tie render", async () => {
     const plays = [0, 8, 1, 7, 3, 6, 4, 5]
     await playOn(plays)
-    expect($0.target.msg.innerHTML).not.toBe("");
+    expect($0.target.msg.textContent).not.toBe("");
     plays.forEach((position) => {
-      expect(getCellByPos(position).innerHTML).not.toBe(null)
+      expect(getCellByPos(position).textContent).not.toBe(null)
     });
   });
 
   // dom
   test("Verify current player render", () => {
-    expect($0.target.curPlayer.innerHTML).toContain(DEFAULT_PLAYER);
+    expect($0.target.curPlayer.textContent).toContain(DEFAULT_PLAYER);
   });
   test("Verify 9 cells render", () => {
     const childrenArr = Array.from($0.target.cellsWrapper.children);
     expect(childrenArr.length).toBe(9);
     childrenArr.forEach((cell) => {
       expect(cell.hasAttribute(`data-${POS_DATA_ATTR}`)).toBe(true);
-      const cellContent = cleanUpContent(cell.innerHTML);
-      expect(cellContent).toBe("");
+      expect(cell.textContent.trim()).toBe("");
     });
   });
   test("Verify empty message render", () => {
-    expect($0.target.msg.innerHTML).toBe("");
+    expect($0.target.msg.textContent.trim()).toEqual("");
   });
 
   // events
   test("Verify play render", async () => {
     await playOn([0])
-    expect(getCellByPos(0).innerHTML).toContain(DEFAULT_PLAYER);
-    expect($0.target.curPlayer.innerHTML).toContain(PLAYER.TWO);
-    expect($0.target.msg.innerHTML).toBe("");
+    expect(getCellByPos(0).textContent.trim()).toContain(DEFAULT_PLAYER);
+    expect($0.target.curPlayer.textContent.trim()).toContain(PLAYER.TWO);
+    expect($0.target.msg.textContent.trim()).toBe("");
   });
   test("Verify undo render", async () => {
     await playOn([0])
-    expect(cleanUpContent(getCellByPos(0).innerHTML)).not.toBe("");
-    await userEvent.click($0.target.undoBtn)
+    expect(getCellByPos(0).textContent.trim()).not.toBe("");
+    $0.onUndo();
     await flushPromises()
-    expect(cleanUpContent(getCellByPos(0).innerHTML)).toBe("");
+    expect(getCellByPos(0).textContent.trim()).toBe("");
   });
   test("Verify reset render", async () => {
     const plays = [0, 2]
     await playOn(plays)
     plays.forEach((pos) => {
-      expect(cleanUpContent(getCellByPos(pos).innerHTML)).not.toBe("");
+      expect(getCellByPos(pos).textContent.trim()).not.toBe("");
     });
-    await userEvent.click($0.target.resetBtn)
+    $0.onReset();
     await flushPromises()
     plays.forEach((pos) => {
-      expect(cleanUpContent(getCellByPos(pos).innerHTML)).toBe("");
+      expect(getCellByPos(pos).textContent.trim()).toBe("");
     });
   });
 
   // edge cases
   test("Verify play once on a cell that is already played", async () => {
     await playOn([0])
-    await userEvent.click(getCellByPos(0))
     await flushPromises()
-    await userEvent.click(getCellByPos(0))
+    await playOn([0])
     await flushPromises()
-    expect(cleanUpContent(getCellByPos(0).innerHTML)).toContain(DEFAULT_PLAYER);
+    expect(getCellByPos(0).textContent.trim()).toContain(DEFAULT_PLAYER);
   });
   test("Verify undo on an empty stack", async () => {
-    await userEvent.click($0.target.undoBtn)
+    $0.target.undoBtn.dispatchEvent(CLICK_EVENT);
     await flushPromises()
-    expect($0.target.msg.innerHTML).toBe("");
+    expect($0.target.msg.textContent.trim()).toBe("");
+  });
+  test("Verify render multiple instances and play", async () => {
+    let ticTocElement = document.createElement(ELEMENT_NAME);
+    ticTocElement.id = "some-id2";
+    document.body.appendChild(ticTocElement);
+    await flushPromises()
+
+    const $1 = document.body.querySelector('#some-id2');
+
+    const firstPos0 = $0.querySelector(`[data-${POS_DATA_ATTR}="0"]`)
+    const firstPos1 = $0.querySelector(`[data-${POS_DATA_ATTR}="1"]`)
+    const secondPos0 = $1.querySelector(`[data-${POS_DATA_ATTR}="0"]`)
+    const secondPos1 = $1.querySelector(`[data-${POS_DATA_ATTR}="1"]`)
+
+    $0.onPlay({ target: firstPos0 });
+    $1.onPlay({ target: firstPos1 });
+    await flushPromises()
+
+    expect(firstPos0.textContent.trim()).toContain(DEFAULT_PLAYER);
+    expect(firstPos1.textContent.trim()).toBe("");
+    expect(secondPos1.textContent.trim()).toContain(DEFAULT_PLAYER);
+    expect(secondPos0.textContent.trim()).toBe("");
   });
 });

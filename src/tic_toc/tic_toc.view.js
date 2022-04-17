@@ -38,18 +38,54 @@ export class TicTocView extends BaseView {
         return html`${player}`
     }
 
-    render() {
-        render(this.element.target.msg, this.resultMsg({
-            winner: this.model.ticTocModel.winner,
-            playCount: this.model.ticTocModel.playCount
-        }));
+    undoBtn({ playCount }) {
+        const canUndo = playCount > 0;
+        return html`
+        <button data-target="tic-toc.undoBtn"
+                data-action="click:tic-toc#onUndo"
+                .disabled=${!canUndo}>Undo</button>`
+    }
 
-        render(this.element.target.cellsWrapper, this.cells({
-            getPlayByPosition: this.model.ticTocModel.getPlayByPosition.bind(this.model.ticTocModel)
-        }));
+    resetBtn({ playCount }) {
+        const canUndo = playCount > 0;
+        return html`
+        <button data-target="tic-toc.resetBtn"
+                data-action="click:tic-toc#onReset"
+                .disabled=${!canUndo}>Reset</button>`
+    }
 
-        render(this.element.target.curPlayer, this.currPlayer({
-            player: this.model.ticTocModel.player
+    template({ tagName, player, playCount, getPlayByPosition, winner }) {
+        return html`
+            <div>
+                Current Player: <span .dataset="${{ target: `${tagName}.curPlayer` }}">${this.currPlayer({ player })}</span>
+            </div>
+            <div class="cells"
+                .dataset="${{
+                target: `${tagName}.cellsWrapper`,
+                action: `click:${tagName}#onPlay`
+            }}">
+                ${this.cells({ getPlayByPosition })}
+            </div>
+            <div .dataset="${{ target: `${tagName}.msg` }}">
+                ${this.resultMsg({ winner, playCount })}
+            </div>
+            <div>
+                ${this.undoBtn({ playCount })}
+                ${this.resetBtn({ playCount })}
+            </div>
+        `
+    }
+
+    render(element, model) {
+        const { player, playCount, winner } = model.ticTocModel;
+        const getPlayByPosition = model.ticTocModel.getPlayByPosition.bind(model.ticTocModel);
+        const tagName = element.tagName.toLowerCase();
+        render(element, this.template({
+            tagName,
+            player,
+            playCount,
+            getPlayByPosition,
+            winner
         }));
     }
 }

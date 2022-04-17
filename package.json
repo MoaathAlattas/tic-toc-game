@@ -10,13 +10,12 @@
   },
   "scripts": {
     "start": "parcel src/index.html --no-cache --hmr-port 1234",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --watchAll",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --no-cache --watchAll",
     "build": "parcel build src/index.html --no-cache",
     "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --collect-coverage"
   },
   "devDependencies": {
-    "@testing-library/dom": "^8.13.0",
-    "@testing-library/user-event": "^14.1.0"
+    "@testing-library/dom": "^8.13.0"
   },
   "keywords": [],
   "description": "",

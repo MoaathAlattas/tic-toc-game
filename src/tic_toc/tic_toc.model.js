@@ -48,7 +48,7 @@ export class TicTocModel {
         this.winner = winCondition.length > 0 ? this.player : "";
     }
     switchPlayer() {
-        this.player = this.nextPlayer;
+        this.player = this.nextPlayer();
     }
     canPlay(position) {
         const alreadyPlayed = this.getPlayByPosition(position);
@@ -81,7 +81,7 @@ export class TicTocModel {
             return acc;
         }, {});
     }
-    get nextPlayer() {
+    nextPlayer() {
         return this.player === PLAYER.ONE ? PLAYER.TWO : PLAYER.ONE;
     }
     isDone() {
