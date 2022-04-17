@@ -1,28 +1,27 @@
 import { bind } from './catalyst'
+import { render, html } from './render'
 
 
 function debounceRender(element) {
-    if (!element.view) return;
-
     if (element.debounce) {
         cancelAnimationFrame(element.debounce);
     }
-    element.debounce = requestAnimationFrame(() => {
-        element.view.render(element, element.props())
-    });
+    element.debounce = requestAnimationFrame(() => element.render());
 };
 
 export function customElement(customElement, elementProps = {}) {
     customElement.prototype.target = {}
     customElement.prototype.targets = {}
     customElement.prototype.model = {}
-    customElement.prototype.view = null
+
+    customElement.prototype.render = function () {
+        this.template && render(this, this.template);
+    }
 
     const connectedCallback = customElement.prototype.connectedCallback
     customElement.prototype.connectedCallback = function () {
         customElements.upgrade(this)
         let _model = {};
-        let _view = null;
 
         // setup models
         if (customElement.model) {
@@ -31,7 +30,7 @@ export function customElement(customElement, elementProps = {}) {
                 _model[modelName] = new Proxy(new Model(), {
                     set: (target, name, val) => {
                         target[name] = val
-                        debounceRender(this);
+                        this.render && debounceRender(this);
                         return true
                     }
                 })
@@ -40,16 +39,6 @@ export function customElement(customElement, elementProps = {}) {
                 enumerable: true,
                 configurable: true,
                 get: () => _model
-            })
-        }
-
-        // setup view
-        if (customElement.view) {
-            _view = new customElement.view(this, this.props())
-            Object.defineProperty(this, "view", {
-                enumerable: true,
-                configurable: true,
-                get: () => _view
             })
         }
 
@@ -74,15 +63,9 @@ export function customElement(customElement, elementProps = {}) {
                 })
             })
         }
-        this.view && debounceRender(this);
+        this.render && debounceRender(this);
         bind(this)
         connectedCallback && connectedCallback.call(this)
-    }
-
-    const render = customElement.prototype.render
-    customElement.prototype.render = function () {
-        render && render()
-        _view && debounceRender(this)
     }
 
     return customElement
