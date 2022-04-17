@@ -2,35 +2,27 @@ import { bind } from './catalyst'
 
 
 function debounceRender(element) {
+    if (!element.view) return;
+
     if (element.debounce) {
         cancelAnimationFrame(element.debounce);
     }
     element.debounce = requestAnimationFrame(() => {
-        element.view.render(element, element.model)
+        element.view.render(element, element.props())
     });
 };
 
-export function customElement(customElement, props = {}) {
+export function customElement(customElement, elementProps = {}) {
     customElement.prototype.target = {}
     customElement.prototype.targets = {}
     customElement.prototype.model = {}
     customElement.prototype.view = null
-    customElement.prototype.props = props
+
     const connectedCallback = customElement.prototype.connectedCallback
     customElement.prototype.connectedCallback = function () {
         customElements.upgrade(this)
         let _model = {};
         let _view = null;
-
-        // setup view
-        if (customElement.view) {
-            _view = new customElement.view({ ...this.viewData })
-            Object.defineProperty(this, "view", {
-                enumerable: true,
-                configurable: true,
-                get: () => _view
-            })
-        }
 
         // setup models
         if (customElement.model) {
@@ -39,7 +31,7 @@ export function customElement(customElement, props = {}) {
                 _model[modelName] = new Proxy(new Model(), {
                     set: (target, name, val) => {
                         target[name] = val
-                        this.view && debounceRender(this);
+                        debounceRender(this);
                         return true
                     }
                 })
@@ -48,6 +40,16 @@ export function customElement(customElement, props = {}) {
                 enumerable: true,
                 configurable: true,
                 get: () => _model
+            })
+        }
+
+        // setup view
+        if (customElement.view) {
+            _view = new customElement.view(this, this.props())
+            Object.defineProperty(this, "view", {
+                enumerable: true,
+                configurable: true,
+                get: () => _view
             })
         }
 
@@ -72,9 +74,8 @@ export function customElement(customElement, props = {}) {
                 })
             })
         }
-
-        bind(this)
         this.view && debounceRender(this);
+        bind(this)
         connectedCallback && connectedCallback.call(this)
     }
 
@@ -98,7 +99,8 @@ export function findTargets(element, name) {
 }
 
 export class BaseView {
-    constructor(viewData) {
-        Object.assign(this, viewData)
+    constructor(element, props) {
+        this.element = element
+        this.props = props
     }
 }

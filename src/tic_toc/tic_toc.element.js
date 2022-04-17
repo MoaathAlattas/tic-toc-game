@@ -13,20 +13,34 @@ export default class TicTocElement extends HTMLElement {
   static view = TicTocView
   static target = ["curPlayer", "msg", "undoBtn", "resetBtn", "cellsWrapper"]
 
+  connectedCallback() {
+    //console.log(this.props);
+  }
+
   disconnectedCallback() {
     this.model.ticTocModel.reset();
   }
 
+  props() {
+    let { player, playCount, winner, plays } = this.model.ticTocModel
+    return {
+      plays,
+      player,
+      playCount,
+      winner
+    }
+  }
+
   // event handlers
-  onPlay({ target }) {
+  onPlay = ({ target }) => {
     if (target.dataset.pos) {
       this.model.ticTocModel.playOnce(target.dataset.pos)
     }
   }
-  onUndo() {
+  onUndo = () => {
     this.model.ticTocModel.undo();
   }
-  onReset() {
+  onReset = () => {
     this.model.ticTocModel.reset();
   }
 
@@ -36,6 +50,6 @@ if (!customElements.get(ELEMENT_NAME)) {
   window[ELEMENT_NAME] = TicTocElement
   customElements.define(
     ELEMENT_NAME,
-    customElement(TicTocElement)
+    customElement(TicTocElement, { "klb": true })
   )
 }

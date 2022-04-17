@@ -12,21 +12,11 @@ describe.only('TicTocElement', () => {
   const getCellByPos = (position) => $0.querySelector(`[data-${POS_DATA_ATTR}="${position}"]`);
   const playOn = async (positions) => {
     for (const position of positions) {
-      $0.onPlay({ target: getCellByPos(position) });
+      getCellByPos(position).dispatchEvent(CLICK_EVENT);
     }
     await flushPromises()
   }
 
-  // Render to dom: cells, winner message, current player
-  // Events: play once, undo, reset
-  // happy path: win, no win, tie
-  // sad path: invalid play
-  // edge cases:
-  //   - play once on a cell that is already played
-  //   - undo on an empty stack
-  //   - reset
-  //   - play once on an empty cell
-  //   - play once on a cell that is already played
   beforeEach(async () => {
     let ticTocElement = document.createElement(ELEMENT_NAME);
     ticTocElement.id = "some-id";
@@ -88,7 +78,7 @@ describe.only('TicTocElement', () => {
   test("Verify undo render", async () => {
     await playOn([0])
     expect(getCellByPos(0).textContent.trim()).not.toBe("");
-    $0.onUndo();
+    $0.target.undoBtn.dispatchEvent(CLICK_EVENT);
     await flushPromises()
     expect(getCellByPos(0).textContent.trim()).toBe("");
   });
@@ -98,7 +88,7 @@ describe.only('TicTocElement', () => {
     plays.forEach((pos) => {
       expect(getCellByPos(pos).textContent.trim()).not.toBe("");
     });
-    $0.onReset();
+    $0.target.resetBtn.dispatchEvent(CLICK_EVENT);
     await flushPromises()
     plays.forEach((pos) => {
       expect(getCellByPos(pos).textContent.trim()).toBe("");
