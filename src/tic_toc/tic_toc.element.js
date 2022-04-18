@@ -14,8 +14,7 @@ import { UndoBtn } from './components/undo_btn'
 import { ResetBtn } from './components/reset_btn'
 
 // custom element
-export default class TicTocElement extends HTMLElement {
-  name = ELEMENT_NAME
+export class TicTocElement extends HTMLElement {
   static model = [TicTocModel];
   static target = ["curPlayer", "msg", "undoBtn", "resetBtn", "cellsWrapper"]
 
@@ -44,28 +43,24 @@ export default class TicTocElement extends HTMLElement {
     const { player, plays, winner, playCount } = this.model.ticTocModel;
     return html`
       <div>
-          Current Player: <span .dataset="${{ target: `${ELEMENT_NAME}.curPlayer` }}">${player}</span>
+          Current Player: <span .dataset="${{ target: `${this._name}.curPlayer` }}">${player}</span>
       </div>
       <div class="cells"
             onClick="${this.onPlay}"
-            .dataset="${{ target: `${ELEMENT_NAME}.cellsWrapper` }}">
+            .dataset="${{ target: `${this._name}.cellsWrapper` }}">
           ${Cells({ plays, POS_DATA_ATTR, WIN_DATA_ATTR })}
       </div>
-      <div .dataset="${{ target: `${ELEMENT_NAME}.msg` }}">
+      <div .dataset="${{ target: `${this._name}.msg` }}">
           ${ResultMsg({ winner, playCount, WIN_MSG, TIE_MSG })}
       </div>
       <div>
-          ${UndoBtn({ playCount, onUndo: this.onUndo, ELEMENT_NAME })}
-          ${ResetBtn({ playCount, onReset: this.onReset, ELEMENT_NAME })}
+          ${UndoBtn({ playCount, onUndo: this.onUndo, tagName: this._name })}
+          ${ResetBtn({ playCount, onReset: this.onReset, tagName: this._name })}
       </div>
       `;
   }
 }
 
-if (!customElements.get(ELEMENT_NAME)) {
-  window[ELEMENT_NAME] = TicTocElement
-  customElements.define(
-    ELEMENT_NAME,
-    customElement(TicTocElement, { "klb": true })
-  )
-}
+export default customElement(TicTocElement, {
+  name: ELEMENT_NAME,
+})

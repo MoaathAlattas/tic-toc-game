@@ -1,18 +1,19 @@
 import { bind } from './catalyst'
-import { render, html } from './render'
+import { render } from './render'
 
-
-function debounceRender(element) {
-    if (element.debounce) {
-        cancelAnimationFrame(element.debounce);
-    }
-    element.debounce = requestAnimationFrame(() => element.render());
-};
-
-export function customElement(customElement, props = {}) {
+export function customElement(customElement, defaultConfig = {}) {
     customElement.prototype.target = {}
     customElement.prototype.targets = {}
     customElement.prototype.model = {}
+    customElement.config = defaultConfig
+
+    // Setup default Name
+    Object.defineProperty(customElement, '_name', {
+        get: () => customElement.config.name
+    })
+    Object.defineProperty(customElement.prototype, '_name', {
+        get: () => customElement._name
+    })
 
     customElement.prototype.render = function () {
         this.template && render(this, this.template);
@@ -68,22 +69,30 @@ export function customElement(customElement, props = {}) {
         connectedCallback && connectedCallback.call(this)
     }
 
-    return customElement
+    return (config = {}) => {
+        Object.assign(customElement.config, config)
+        if (!customElements.get(customElement._name)) {
+            window[customElement._name] = customElement
+            customElements.define(customElement._name, customElement)
+        }
+        return customElement
+    }
 }
 
+function debounceRender(element) {
+    if (element.debounce) {
+        cancelAnimationFrame(element.debounce);
+    }
+    element.debounce = requestAnimationFrame(() => element.render());
+};
+
 export function findTarget(element, name) {
-    for (const el of element.querySelectorAll(`[data-target~="${element.name}.${name}"]`)) {
-        if (el.closest(element.name) === element) return el
+    for (const el of element.querySelectorAll(`[data-target~="${element._name
+        }.${name}"]`)) {
+        if (el.closest(element._name) === element) return el
     }
 }
 
 export function findTargets(element, name) {
-    return element.querySelectorAll(`[data-target="${element.name}.${name}"]`)
-}
-
-export class BaseView {
-    constructor(element, props) {
-        this.element = element
-        this.props = props
-    }
+    return element.querySelectorAll(`[data-target="${element.constructor.name}.${name}"]`)
 }

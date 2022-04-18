@@ -1,8 +1,8 @@
 import { html } from '../../lib/render';
-export const ResetBtn = ({ playCount, onReset, ELEMENT_NAME }) => {
+export const ResetBtn = ({ playCount, onReset, tagName }) => {
     const canUndo = playCount > 0;
     return html`
         <button onClick="${onReset}"
-                .dataset = "${{ target: `${ELEMENT_NAME}.resetBtn` }}"
+                .dataset = "${{ target: `${tagName}.resetBtn` }}"
                 .disabled=${!canUndo}>Reset</button>`
 }

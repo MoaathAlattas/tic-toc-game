@@ -1,4 +1,4 @@
-import '../tic_toc.element.js'
+import TicTocElement from '../tic_toc.element.js'
 import {
   DEFAULT_PLAYER, PLAYER, ELEMENT_NAME,
   POS_DATA_ATTR, WIN_DATA_ATTR
@@ -17,6 +17,10 @@ describe.only('TicTocElement', () => {
     }
     await flushPromises()
   }
+
+  beforeAll(() => {
+    TicTocElement()
+  })
 
   beforeEach(async () => {
     let ticTocElement = document.createElement(ELEMENT_NAME);
