@@ -5,15 +5,7 @@ export function customElement(customElement, defaultConfig = {}) {
     customElement.prototype.target = {}
     customElement.prototype.targets = {}
     customElement.prototype.model = {}
-    customElement.config = defaultConfig
-
-    // Setup default Name
-    Object.defineProperty(customElement, '_name', {
-        get: () => customElement.config.name
-    })
-    Object.defineProperty(customElement.prototype, '_name', {
-        get: () => customElement._name
-    })
+    customElement.prototype.config = defaultConfig
 
     customElement.prototype.render = function () {
         this.template && render(this, this.template);
@@ -70,10 +62,11 @@ export function customElement(customElement, defaultConfig = {}) {
     }
 
     return (config = {}) => {
-        Object.assign(customElement.config, config)
-        if (!customElements.get(customElement._name)) {
-            window[customElement._name] = customElement
-            customElements.define(customElement._name, customElement)
+        Object.assign(customElement.prototype.config, config)
+        const { name } = customElement.prototype.config
+        if (!customElements.get(name)) {
+            window[name] = customElement
+            customElements.define(name, customElement)
         }
         return customElement
     }
@@ -87,12 +80,12 @@ function debounceRender(element) {
 };
 
 export function findTarget(element, name) {
-    for (const el of element.querySelectorAll(`[data-target~="${element._name
+    for (const el of element.querySelectorAll(`[data-target~="${element.config.name
         }.${name}"]`)) {
-        if (el.closest(element._name) === element) return el
+        if (el.closest(element.config.name) === element) return el
     }
 }
 
 export function findTargets(element, name) {
-    return element.querySelectorAll(`[data-target="${element.constructor.name}.${name}"]`)
+    return element.querySelectorAll(`[data-target="${element.config.name}.${name}"]`)
 }

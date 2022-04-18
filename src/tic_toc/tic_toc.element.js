@@ -43,19 +43,19 @@ export class TicTocElement extends HTMLElement {
     const { player, plays, winner, playCount } = this.model.ticTocModel;
     return html`
       <div>
-          Current Player: <span .dataset="${{ target: `${this._name}.curPlayer` }}">${player}</span>
+          Current Player: <span .dataset="${{ target: `${this.config.name}.curPlayer` }}">${player}</span>
       </div>
       <div class="cells"
             onClick="${this.onPlay}"
-            .dataset="${{ target: `${this._name}.cellsWrapper` }}">
+            .dataset="${{ target: `${this.config.name}.cellsWrapper` }}">
           ${Cells({ plays, POS_DATA_ATTR, WIN_DATA_ATTR })}
       </div>
-      <div .dataset="${{ target: `${this._name}.msg` }}">
+      <div .dataset="${{ target: `${this.config.name}.msg` }}">
           ${ResultMsg({ winner, playCount, WIN_MSG, TIE_MSG })}
       </div>
       <div>
-          ${UndoBtn({ playCount, onUndo: this.onUndo, tagName: this._name })}
-          ${ResetBtn({ playCount, onReset: this.onReset, tagName: this._name })}
+          ${UndoBtn({ playCount, onUndo: this.onUndo, tagName: this.config.name })}
+          ${ResetBtn({ playCount, onReset: this.onReset, tagName: this.config.name })}
       </div>
       `;
   }
@@ -63,4 +63,13 @@ export class TicTocElement extends HTMLElement {
 
 export default customElement(TicTocElement, {
   name: ELEMENT_NAME,
+  dataset: {
+    pos: POS_DATA_ATTR,
+    win: WIN_DATA_ATTR
+  },
+  text: {
+    win: WIN_MSG,
+    tie: TIE_MSG
+  },
+  props: {}
 })
