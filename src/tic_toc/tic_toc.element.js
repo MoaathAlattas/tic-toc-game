@@ -41,21 +41,22 @@ export class TicTocElement extends HTMLElement {
 
   get template() {
     const { player, plays, winner, playCount } = this.model.ticTocModel;
+    const { name, dataset, text } = this.config;
     return html`
       <div>
-          Current Player: <span .dataset="${{ target: `${this.config.name}.curPlayer` }}">${player}</span>
+          Current Player: <span .dataset="${{ target: `${name}.curPlayer` }}">${player}</span>
       </div>
       <div class="cells"
-            onClick="${this.onPlay}"
-            .dataset="${{ target: `${this.config.name}.cellsWrapper` }}">
-          ${Cells({ plays, POS_DATA_ATTR, WIN_DATA_ATTR })}
+           onClick="${this.onPlay}"
+           .dataset="${{ target: `${name}.cellsWrapper` }}">
+          ${Cells({ plays, dataset })}
       </div>
-      <div .dataset="${{ target: `${this.config.name}.msg` }}">
-          ${ResultMsg({ winner, playCount, WIN_MSG, TIE_MSG })}
+      <div .dataset="${{ target: `${name}.msg` }}">
+          ${ResultMsg({ winner, playCount, text })}
       </div>
       <div>
-          ${UndoBtn({ playCount, onUndo: this.onUndo, tagName: this.config.name })}
-          ${ResetBtn({ playCount, onReset: this.onReset, tagName: this.config.name })}
+          ${UndoBtn({ playCount, onUndo: this.onUndo, tagName: name })}
+          ${ResetBtn({ playCount, onReset: this.onReset, tagName: name })}
       </div>
       `;
   }
